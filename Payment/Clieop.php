@@ -41,13 +41,6 @@
  */
 
 
-/**
- * require PEAR
- *
- * This package depends on PEAR to raise errors.
- */
-require_once 'PEAR.php';
-
 
 /**
  * Main clieop class
@@ -161,27 +154,28 @@ class Payment_Clieop
     * Adds a payment record to the clieop file
     * @param object paymentObject    - Instance of transactionPayment
     * @access public
-    * @return mixed true on success or PEAR_Error object
+    * @return mixed true on success or error
     */
     function addPayment($paymentObject)
     {
         if (is_null($paymentObject))
         {
-            return PEAR::raiseError('Payment object cannot be null');
+            return user_error('Payment object cannot be null');
         }
         
         //Only one type of transaction is allowed in a clieop
         if ($this->_TransactionType != $paymentObject->getPaymentType())
         {
-            return PEAR::raiseError('Payment transaction type does not match Clieop transaction type');
+            return user_error('Payment transaction type does not match Clieop transaction type');
         }
         
         //Check if amount in transaction is valid (must be > 0)
         $paymentAmount = $paymentObject->getAmount();
         if ($paymentAmount < 0) {
-            return PEAR::raiseError('Payment amount cannot be negative: ' . $paymentAmount);
-        } elseif ($paymentAmount == 0) {
-            return PEAR::raiseError('Payment amount must be nonzero: ' . $paymentAmount);
+            return user_error('Payment amount cannot be negative: ' . $paymentAmount);
+        } 
+        elseif ($paymentAmount == 0) {
+            return user_error('Payment amount must be nonzero: ' . $paymentAmount);
         }
         
         //transactieinfo (0100)
@@ -233,13 +227,13 @@ class Payment_Clieop
     /**
     * Writes complete clieop file
     * @access public
-    * @return mixed string containing clieop batch, or PEAR_Error object
+    * @return mixed string containing clieop batch, or error
     */
     function writeClieop()
     {
         if ($this->_NumberOfTransactions == 0)
         {
-            return PEAR::raiseError('No transactions have been added to this Clieop batch');
+            return user_error('No transactions have been added to this Clieop batch');
         }
             
         $text  = $this->writeBestandsvoorloopInfo($this->_SenderIdent, $this->_BatchNumber);
